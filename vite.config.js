@@ -12,5 +12,36 @@ export default defineConfig(({ mode }) => {
     define: {
       __APP_ENV__: JSON.stringify(env.APP_ENV),
     },
+    server: {
+      proxy: {
+        '/openai-proxy': {
+          target: 'https://api.openai.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/openai-proxy/, ''),
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq) => {
+              const key = env.OPENAI_API_KEY || env.VITE_OPENAI_API_KEY;
+              if (key) {
+                proxyReq.setHeader('Authorization', `Bearer ${key}`);
+              }
+            });
+          },
+        },
+        '/anthropic-proxy': {
+          target: 'https://api.anthropic.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/anthropic-proxy/, ''),
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq) => {
+              const key = env.ANTHROPIC_API_KEY || env.VITE_ANTHROPIC_API_KEY;
+              if (key) {
+                proxyReq.setHeader('x-api-key', key);
+              }
+              proxyReq.setHeader('anthropic-version', '2023-06-01');
+            });
+          },
+        },
+      },
+    },
   }
 })
