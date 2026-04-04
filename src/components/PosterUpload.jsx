@@ -11,7 +11,6 @@ function PosterUpload({ user }) {
   const [location, setLocation] = useState([]); // Initialize as array for multi-select
   const [otherLocation, setOtherLocation] = useState('');
   const [category, setCategory] = useState([]); // Initialize as array for multi-select
-  const [image, setImage] = useState(null);
   const [tags, setTags] = useState('');
   const [repeating, setRepeating] = useState(false);
   const [singleEventDate, setSingleEventDate] = useState('');
@@ -40,46 +39,9 @@ function PosterUpload({ user }) {
     'Other',
   ];
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-        setImage(dataUrl);
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-
   const handleDayChange = (e) => {
     const { value, checked } = e.target;
-    setDaysOfWeek(prev => 
+    setDaysOfWeek(prev =>
       checked ? [...prev, value] : prev.filter(day => day !== value)
     );
   };
@@ -95,10 +57,6 @@ function PosterUpload({ user }) {
     e.preventDefault();
     if (!auth.currentUser) {
       setError('You must be logged in to upload a poster.');
-      return;
-    }
-    if (!image) {
-      setError('Please select an image.');
       return;
     }
     if (category.length === 0) {
@@ -131,12 +89,10 @@ function PosterUpload({ user }) {
         description,
         location: finalLocations, // Now an array of selected locations or custom 'Other'
         category, // Now an array
-        image_url: image,
         uploaded_by: auth.currentUser.uid,
         tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag !== ''),
         repeating,
         created_at: Timestamp.now(),
-        image_filename: `${title.split(' ')[0] || 'untitled'}.png`, // Add the new filename field
         sort_date: repeating ? nextOccurringDate : singleEventDate,
       };
 
@@ -156,14 +112,13 @@ function PosterUpload({ user }) {
       setDescription('');
       setLocation('');
       setCategory([]); // Reset to empty array
-      setImage(null);
       setTags('');
       setRepeating(false);
       setSingleEventDate('');
-        setNextOccurringDate('');
-        setFrequency('');
-        setDaysOfWeek([]);
-        setOtherLocation('');
+      setNextOccurringDate('');
+      setFrequency('');
+      setDaysOfWeek([]);
+      setOtherLocation('');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -217,10 +172,6 @@ function PosterUpload({ user }) {
               </label>
             ))}
           </div>
-        </div>
-        <div>
-          <label>Image:</label>
-          <input type="file" onChange={handleImageChange} accept="image/*" required />
         </div>
         <div>
           <label>Tags (comma-separated):</label>
