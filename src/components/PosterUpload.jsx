@@ -286,7 +286,7 @@ function PosterUpload({ user }) {
             </button>
           </div>
           <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '6px' }}>
-            For local dev, add <code>ANTHROPIC_API_KEY</code> to <code>.env.local</code> (Vite proxy). To use OpenAI instead: <code>VITE_POSTER_AUTOFILL_PROVIDER=openai</code> and <code>OPENAI_API_KEY</code>.
+            Default: <strong>Ollama</strong> — run <code>ollama pull llava</code> on the host machine. Remote lab PC: set <code>OLLAMA_HOST=http://10.x.x.x:11434</code> in <code>.env.local</code>. Other providers: <code>VITE_POSTER_AUTOFILL_PROVIDER=openai|anthropic</code> + API keys.
           </p>
         </div>
         <div>

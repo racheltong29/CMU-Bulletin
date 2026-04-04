@@ -38,8 +38,14 @@ export default defineConfig(({ mode }) => {
                 proxyReq.setHeader('x-api-key', key);
               }
               proxyReq.setHeader('anthropic-version', '2023-06-01');
+              proxyReq.setHeader('anthropic-dangerous-direct-browser-access', 'true');
             });
           },
+        },
+        '/ollama-proxy': {
+          target: env.OLLAMA_HOST || 'http://127.0.0.1:11434',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/ollama-proxy/, ''),
         },
       },
     },

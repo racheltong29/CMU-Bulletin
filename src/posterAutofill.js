@@ -1,10 +1,12 @@
 /**
- * Poster autofill: sends base64 JPEG/PNG to Anthropic Claude by default (or OpenAI if configured).
+ * Poster autofill: vision → structured fields.
  *
- * Local dev (`npm run dev`): use ANTHROPIC_API_KEY in .env.local (no VITE_ prefix) — Vite proxies
- * /anthropic-proxy so keys stay off the client. Override: VITE_POSTER_AUTOFILL_PROVIDER=openai + OPENAI_API_KEY.
+ * Default: Ollama (local or LAN) — no API keys. Install Ollama, run `ollama pull llava` (or another vision model).
  *
- * Production: VITE_ANTHROPIC_API_KEY (or VITE_OPENAI_API_KEY); prefer a backend proxy for real secrecy.
+ * Override: VITE_POSTER_AUTOFILL_PROVIDER=openai | anthropic (+ keys as before).
+ *
+ * Dev: Vite proxies /ollama-proxy → OLLAMA_HOST (default http://127.0.0.1:11434). Remote lab machine: OLLAMA_HOST=http://10.x.x.x:11434
+ * Prod: set VITE_OLLAMA_URL to the same base URL if Ollama is not on localhost (Ollama enables CORS by default).
  */
 
 const OPENAI_MODEL = 'gpt-4o-mini';
@@ -78,6 +80,59 @@ function useDevProxy() {
   return import.meta.env.DEV === true;
 }
 
+function ollamaBaseUrl() {
+  if (useDevProxy()) {
+    return '/ollama-proxy';
+  }
+  const u = import.meta.env.VITE_OLLAMA_URL || 'http://127.0.0.1:11434';
+  return u.replace(/\/$/, '');
+}
+
+function ollamaModel() {
+  return import.meta.env.VITE_OLLAMA_MODEL || 'llava';
+}
+
+async function extractWithOllama({ imageBase64 }) {
+  const url = `${ollamaBaseUrl()}/api/chat`;
+  const jsonPrompt = `${SYSTEM_PROMPT}
+
+Output a single JSON object only (no markdown). Keys exactly: title, organizer, description, location, category, tags, single_event_date, repeating, next_occurring_date, frequency, days_of_week. Use "" or [] when unknown.`;
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: ollamaModel(),
+      stream: false,
+      format: 'json',
+      messages: [
+        {
+          role: 'user',
+          content: jsonPrompt,
+          images: [imageBase64],
+        },
+      ],
+    }),
+  });
+
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = body?.error || body?.message || res.statusText || 'Ollama request failed';
+    throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+  }
+
+  const raw = body.message?.content;
+  if (!raw) {
+    throw new Error('No response from Ollama (is a vision model installed? e.g. ollama pull llava)');
+  }
+  const text = typeof raw === 'string' ? raw : JSON.stringify(raw);
+  try {
+    return JSON.parse(stripJsonFence(text));
+  } catch {
+    return JSON.parse(text);
+  }
+}
+
 async function extractWithOpenAI({ imageBase64, mediaType }) {
   const devProxy = useDevProxy();
   const url = devProxy
@@ -127,13 +182,13 @@ async function extractWithOpenAI({ imageBase64, mediaType }) {
     body: JSON.stringify(payload),
   });
 
-  const body = await res.json().catch(() => ({}));
+  const resBody = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const msg = body?.error?.message || res.statusText || 'OpenAI request failed';
+    const msg = resBody?.error?.message || res.statusText || 'OpenAI request failed';
     throw new Error(msg);
   }
 
-  const text = body.choices?.[0]?.message?.content;
+  const text = resBody.choices?.[0]?.message?.content;
   if (!text) {
     throw new Error('No response from OpenAI');
   }
@@ -145,7 +200,10 @@ async function extractWithAnthropic({ imageBase64, mediaType }) {
   const url = devProxy
     ? '/anthropic-proxy/v1/messages'
     : 'https://api.anthropic.com/v1/messages';
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = {
+    'Content-Type': 'application/json',
+    'anthropic-dangerous-direct-browser-access': 'true',
+  };
   if (!devProxy) {
     const k = getAnthropicKey();
     if (!k) {
@@ -184,13 +242,13 @@ async function extractWithAnthropic({ imageBase64, mediaType }) {
     }),
   });
 
-  const body = await res.json().catch(() => ({}));
+  const resBody = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const msg = body?.error?.message || res.statusText || 'Anthropic request failed';
+    const msg = resBody?.error?.message || res.statusText || 'Anthropic request failed';
     throw new Error(msg);
   }
 
-  const text = body.content?.find((b) => b.type === 'text')?.text;
+  const text = resBody.content?.find((b) => b.type === 'text')?.text;
   if (!text) {
     throw new Error('No response from Claude');
   }
@@ -202,9 +260,12 @@ async function extractWithAnthropic({ imageBase64, mediaType }) {
  * @returns {Promise<object>}
  */
 export async function extractPosterInfoFromImage({ imageBase64, mediaType = 'image/jpeg' }) {
-  const provider = (import.meta.env.VITE_POSTER_AUTOFILL_PROVIDER || 'anthropic').toLowerCase();
+  const provider = (import.meta.env.VITE_POSTER_AUTOFILL_PROVIDER || 'ollama').toLowerCase();
   if (provider === 'openai') {
     return extractWithOpenAI({ imageBase64, mediaType });
   }
-  return extractWithAnthropic({ imageBase64, mediaType });
+  if (provider === 'anthropic') {
+    return extractWithAnthropic({ imageBase64, mediaType });
+  }
+  return extractWithOllama({ imageBase64 });
 }
