@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { auth, db } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { collection, query, where, onSnapshot, deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import { posterImgSrc } from '../posterImage';
 import { useNavigate } from 'react-router-dom';
 import Modal from './Modal';
 import './UserProfile.css'; // Import the new CSS file
@@ -181,7 +182,7 @@ function UserProfile() {
           <div className="poster-grid">
             {userPosts.map((poster) => (
               <div key={poster.id} className="poster-card" onClick={() => handlePosterClick(poster)}>
-                <img src={poster.image_url} alt={poster.title} />
+                <img src={posterImgSrc(poster)} alt={poster.title} />
                 <div className="poster-card-content">
                   <h4>{poster.title}</h4>
                   <p><strong>{poster.organizer ? 'Organizer:' : 'Posted by:'}</strong> {poster.organizer || uploaderNames[poster.uploaded_by] || 'Unknown'}</p>
@@ -201,7 +202,7 @@ function UserProfile() {
           <div className="poster-grid">
             {likedPostersData.map((poster) => (
               <div key={poster.id} className="poster-card" onClick={() => handlePosterClick(poster)}>
-                <img src={poster.image_url} alt={poster.title} />
+                <img src={posterImgSrc(poster)} alt={poster.title} />
                 <div className="poster-card-content">
                   <h4>{poster.title}</h4>
                   <p><strong>{poster.organizer ? 'Organizer:' : 'Posted by:'}</strong> {poster.organizer || uploaderNames[poster.uploaded_by] || 'Unknown'}</p>

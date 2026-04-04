@@ -13,6 +13,7 @@ import Modal from './Modal';
 // npm install react-masonry-css
 // if stuff breaks bc not installed
 import Masonry from "react-masonry-css";
+import { posterImgSrc } from '../posterImage';
 
 /*================================================================================
 Helper Function #1: Check if a recurring event occurs on a given date
@@ -395,7 +396,7 @@ function PosterList({ filterDate, filterLocations, filterTags, searchQuery, user
             {filteredPosters.map((poster) => (
               <div key={poster.id} className="poster-card">
                 <img
-                  src={poster.image_url}
+                  src={posterImgSrc(poster)}
                   alt={poster.title}
                   onClick={() => handlePosterClick(poster)}
                 />
@@ -415,7 +416,7 @@ function PosterList({ filterDate, filterLocations, filterTags, searchQuery, user
           filteredPosters.map((poster) => (
             <li key={poster.id} className="poster-item" onClick={() => handlePosterClick(poster)}>
               <div className="poster-item-content">
-                <img src={poster.image_url} width={50} height={50} alt={poster.title} className="poster-thumbnail" />
+                <img src={posterImgSrc(poster)} width={50} height={50} alt={poster.title} className="poster-thumbnail" />
                 <div className="poster-details">
                   <h3>{poster.title}</h3>
                   <p>{poster.description}</p>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase';
-import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, Timestamp, deleteField } from 'firebase/firestore';
 import MultiSelectDropdown from './MultiSelectDropdown';
 
 function EditPoster() {
@@ -24,7 +24,7 @@ function EditPoster() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [currentImageUrl, setCurrentImageUrl] = useState(null); // To display existing image
+  const [currentImageUrl, setCurrentImageUrl] = useState(null); // Legacy stored image, cleared on save
 
   const availableCategories = ['career', 'club', 'performance', 'sports', 'wellness'];
   const availableLocations = [
@@ -91,43 +91,6 @@ function EditPoster() {
     fetchPoster();
   }, [id, navigate]);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-        setImage(dataUrl);
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-
   const handleDayChange = (e) => {
     const { value, checked } = e.target;
     setDaysOfWeek(prev => 
@@ -181,13 +144,10 @@ function EditPoster() {
         uploaded_by: auth.currentUser.uid,
         tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag !== ''),
         repeating,
-        image_filename: `${title.split(' ')[0] || 'untitled'}.png`,
         sort_date: repeating ? nextOccurringDate : singleEventDate,
+        image_url: deleteField(),
+        image_filename: deleteField(),
       };
-
-      if (image) {
-        updatedData.image_url = image; // Only update image if a new one is selected
-      }
 
       if (repeating) {
         updatedData.next_occurring_date = nextOccurringDate;
@@ -262,10 +222,12 @@ function EditPoster() {
           </div>
         </div>
         <div>
-          <label>Current Image:</label>
-          {currentImageUrl && <img src={currentImageUrl} alt="Current Poster" style={{ maxWidth: '200px', maxHeight: '200px', marginBottom: '10px' }} />}
-          <label>Change Image (optional):</label>
-          <input type="file" onChange={handleImageChange} accept="image/*" />
+          <p style={{ fontSize: '0.9rem', color: '#555', marginBottom: '8px' }}>
+            Poster images are not stored in the database. Saving removes any legacy stored thumbnail for this event.
+          </p>
+          {currentImageUrl && (
+            <img src={currentImageUrl} alt="Legacy poster" style={{ maxWidth: '200px', maxHeight: '200px', display: 'block', marginBottom: '10px' }} />
+          )}
         </div>
         <div>
           <label>Tags (comma-separated):</label>

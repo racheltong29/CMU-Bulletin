@@ -2,6 +2,7 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import HeartIcon from './HeartIcon';
+import { posterImgSrc } from '../posterImage';
 
 function Modal({ poster, onClose, user, likedPosters, handleLikeToggle, uploaderName }) {
   if (!poster) return null;
@@ -31,7 +32,7 @@ function Modal({ poster, onClose, user, likedPosters, handleLikeToggle, uploader
         )}
         <div className="modal-body">
           <div className="modal-image-container">
-            <img src={poster.image_url} alt={poster.title} />
+            <img src={posterImgSrc(poster)} alt={poster.title} />
           </div>
           <div className="modal-details-container">
             <h2>{poster.title}</h2>
