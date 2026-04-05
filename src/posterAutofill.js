@@ -96,6 +96,8 @@ async function extractWithOllama({ imageBase64 }) {
   const url = `${ollamaBaseUrl()}/api/chat`;
   const jsonPrompt = `${SYSTEM_PROMPT}
 
+Rules: Only use text you can actually read on the poster image. Do not invent venues, dates, or organizers. If something is unclear, use "" or [].
+
 Output a single JSON object only (no markdown). Keys exactly: title, organizer, description, location, category, tags, single_event_date, repeating, next_occurring_date, frequency, days_of_week. Use "" or [] when unknown.`;
 
   const res = await fetch(url, {
@@ -105,6 +107,12 @@ Output a single JSON object only (no markdown). Keys exactly: title, organizer, 
       model: ollamaModel(),
       stream: false,
       format: 'json',
+      // Low temperature = much more consistent extraction; default ~0.8 is wildly variable on small VLMs.
+      options: {
+        temperature: 0,
+        top_p: 0.9,
+        seed: 42,
+      },
       messages: [
         {
           role: 'user',
