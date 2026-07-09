@@ -1,5 +1,5 @@
 // Import React hooks and router utilities
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
 // Import Firestore SDK functions and database instance
@@ -124,6 +124,31 @@ const getPosterDateTime = (poster) => {
 };
 
 function PosterListCard({ poster, user, likedPosters, onOpen, onLikeToggle, uploaderNames, renderActions }) {
+  const [copied, setCopied] = useState(false);
+  const copiedTimeoutRef = useRef(null);
+
+  useEffect(() => () => {
+    if (copiedTimeoutRef.current) {
+      window.clearTimeout(copiedTimeoutRef.current);
+    }
+  }, []);
+
+  const handleShare = async (event) => {
+    event.stopPropagation();
+    const shareUrl = `${window.location.origin}/poster/${poster.id}`;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      if (copiedTimeoutRef.current) {
+        window.clearTimeout(copiedTimeoutRef.current);
+      }
+      copiedTimeoutRef.current = window.setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+    }
+  };
+
   const categoryPills = toTagList(poster.category).map((cat) => ({
     key: `category-${cat}`,
     label: formatTagLabel(cat),
@@ -138,9 +163,9 @@ function PosterListCard({ poster, user, likedPosters, onOpen, onLikeToggle, uplo
   const locationText = formatLocation(poster.location);
 
   return (
-    <li className={renderActions ? 'poster-list-item--with-actions' : undefined}>
+    <li>
       <article
-        className="poster-list-card"
+        className={`poster-list-card${renderActions ? ' poster-list-card--with-profile-actions' : ''}`}
         onClick={() => onOpen(poster)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -159,22 +184,39 @@ function PosterListCard({ poster, user, likedPosters, onOpen, onLikeToggle, uplo
         <div className="poster-list-card__body">
           <div className="poster-list-card__header">
             <h3 className="poster-list-card__title">{poster.title}</h3>
-            {user && (
-              <button
-                type="button"
-                className="poster-list-card__like"
-                aria-label={likedPosters.includes(poster.id) ? 'Unlike poster' : 'Like poster'}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onLikeToggle(poster.id);
-                }}
-              >
-                <HeartIcon
-                  filled={likedPosters.includes(poster.id)}
-                  style={{ width: '18px', height: '18px', pointerEvents: 'none' }}
-                />
-              </button>
-            )}
+            <div className="poster-list-card__header-actions">
+              <div className="poster-list-card__share-wrap">
+                <button
+                  type="button"
+                  className="poster-list-card__share"
+                  aria-label={copied ? 'Link copied' : 'Copy link to poster'}
+                  onClick={handleShare}
+                >
+                  <img src="/share-icon.svg" alt="" />
+                </button>
+                {copied && (
+                  <div className="poster-list-card__share-toast" role="status" aria-live="polite">
+                    Link copied!
+                  </div>
+                )}
+              </div>
+              {user && (
+                <button
+                  type="button"
+                  className="poster-list-card__like"
+                  aria-label={likedPosters.includes(poster.id) ? 'Unlike poster' : 'Like poster'}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onLikeToggle(poster.id);
+                  }}
+                >
+                  <HeartIcon
+                    filled={likedPosters.includes(poster.id)}
+                    style={{ width: '18px', height: '18px', pointerEvents: 'none' }}
+                  />
+                </button>
+              )}
+            </div>
           </div>
 
           <p className="poster-list-card__organizer">{getOrganizerName(poster, uploaderNames)}</p>
@@ -217,12 +259,12 @@ function PosterListCard({ poster, user, likedPosters, onOpen, onLikeToggle, uplo
             </div>
           )}
         </div>
+        {renderActions && (
+          <div className="profile-poster-actions profile-poster-actions--grid">
+            {renderActions(poster)}
+          </div>
+        )}
       </article>
-      {renderActions && (
-        <div className="profile-poster-actions profile-poster-actions--list">
-          {renderActions(poster)}
-        </div>
-      )}
     </li>
   );
 }

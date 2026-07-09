@@ -1,5 +1,5 @@
 import React from 'react';
-import { FEATURE_HERO_IMAGE, FEATURE_HERO_IMAGE_ALT } from '../config/featureHero';
+import { FEATURE_HERO_ENABLED, FEATURE_HERO_IMAGE, FEATURE_HERO_IMAGE_ALT } from '../config/featureHero';
 
 const categoryHeadlines = {
   All: 'Discover what\u2019s happening on campus',
@@ -12,6 +12,10 @@ const categoryHeadlines = {
 };
 
 function FeatureHero({ activeCategory = 'All' }) {
+  if (!FEATURE_HERO_ENABLED) {
+    return null;
+  }
+
   const hasCustomImage = Boolean(FEATURE_HERO_IMAGE);
 
   if (hasCustomImage) {

@@ -226,50 +226,86 @@
   position: relative;
 }
 
-.profile-poster-actions {
-  display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem 1rem;
+.profile-poster-media {
+  position: relative;
+  overflow: hidden;
 }
 
-.profile-poster-actions .btn {
-  flex: 1;
-  height: 34px;
-  padding: 0 12px;
+.profile-poster-media img,
+.profile-poster-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.profile-poster-actions--grid {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  top: auto;
+  display: flex;
+  gap: 0.25rem;
+  z-index: 2;
+  padding: 0;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.profile-poster-card:hover .profile-poster-actions--grid,
+.profile-poster-card:focus-within .profile-poster-actions--grid,
+.poster-list-card--with-profile-actions:hover .profile-poster-actions--grid,
+.poster-list-card--with-profile-actions:focus-within .profile-poster-actions--grid {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.profile-poster-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
   border-radius: 8px;
-  font-size: 13px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+  cursor: pointer;
 }
 
-.profile-poster-actions .btn-delete {
-  background: #dc3545;
-  color: #fff;
+.profile-poster-action-btn img {
+  display: block;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  transition: opacity 0.2s;
 }
 
-.profile-poster-actions .btn-delete:hover {
-  background: #c82333;
-  color: #fff;
+.profile-poster-action-btn:hover img,
+.profile-poster-action-btn--delete:hover img {
+  opacity: 0.65;
 }
 
-.poster-list-item--with-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+.poster-list-card--with-profile-actions {
+  position: relative;
 }
 
-.poster-list-item--with-actions .poster-list-card {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
+.poster-list-card--with-profile-actions .profile-poster-actions--grid {
+  right: 12px;
+  bottom: 12px;
 }
 
-.profile-poster-actions--list {
-  display: flex;
-  gap: 0.5rem;
-  padding: 0.65rem 1rem 0.85rem;
-  background: var(--background-color);
-  border: 1px solid #E6E6E6;
-  border-top: none;
-  border-radius: 0 0 10px 10px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+@media (hover: none) {
+  .profile-poster-actions--grid,
+  .poster-list-card--with-profile-actions .profile-poster-actions--grid {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
 }
 
 @media (max-width: 768px) {

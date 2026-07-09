@@ -529,7 +529,7 @@ button:focus-visible,
   text-decoration: none !important;
 }
 
-button:hover:not(.nav-icon-btn):not(.clearbtn):not(.profile-tab):not(.profile-sign-out-btn):not(.profile-edit-btn):not(.profile-edit-form__cancel):not(.profile-edit-form__save):not(.profile-edit-modal__close):not(.profile-edit-photo__preview-wrap):not(.profile-edit-photo__remove):not(.filter-reset-link):not(.filter-control--view):not(.auth-submit-btn):not(.poster-upload-submit):not(.poster-upload-cancel):not(.modal-close-btn):not(.modal-share-btn):not(.category-bar-arrow):not(.category-bar__category):not(.modal-heart-overlay),
+button:hover:not(.nav-icon-btn):not(.clearbtn):not(.profile-tab):not(.profile-sign-out-btn):not(.profile-edit-btn):not(.profile-edit-form__cancel):not(.profile-edit-form__save):not(.profile-edit-modal__close):not(.profile-edit-photo__preview-wrap):not(.profile-edit-photo__remove):not(.profile-poster-action-btn):not(.filter-reset-link):not(.filter-control--view):not(.auth-submit-btn):not(.poster-upload-submit):not(.poster-upload-cancel):not(.modal-close-btn):not(.modal-share-btn):not(.poster-list-card__share):not(.poster-list-card__like):not(.category-bar-arrow):not(.category-bar__category):not(.modal-heart-overlay),
 .btn:hover:not(.btn-delete) {
   background-color: #f3f5f8;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);

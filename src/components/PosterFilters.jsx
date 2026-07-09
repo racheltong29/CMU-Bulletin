@@ -75,7 +75,7 @@ function PosterFilters({
   setActiveCategory,
   setSearchQuery,
   onResetFilters,
-  flavorText = "Discover what's going on!",
+  flavorText = "", // hiding this temporarily
   showCategoryBar = true,
   variant,
 }) {

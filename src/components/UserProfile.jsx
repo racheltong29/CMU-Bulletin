@@ -174,17 +174,25 @@ function UserProfile({ searchQuery, setSearchQuery, availableTags }) {
     <>
       <button
         type="button"
-        onClick={() => handleEditPost(poster.id)}
-        className="btn"
+        onClick={(event) => {
+          event.stopPropagation();
+          handleEditPost(poster.id);
+        }}
+        className="profile-poster-action-btn"
+        aria-label="Edit poster"
       >
-        Edit
+        <img src="/pen.svg" alt="" />
       </button>
       <button
         type="button"
-        onClick={() => handleDeletePost(poster.id)}
-        className="btn btn-delete"
+        onClick={(event) => {
+          event.stopPropagation();
+          handleDeletePost(poster.id);
+        }}
+        className="profile-poster-action-btn profile-poster-action-btn--delete"
+        aria-label="Delete poster"
       >
-        Delete
+        <img src="/trash.svg" alt="" />
       </button>
     </>
   );
@@ -194,19 +202,21 @@ function UserProfile({ searchQuery, setSearchQuery, availableTags }) {
       key={poster.id}
       className={`poster-card ${withActions ? 'profile-poster-card' : ''}`}
     >
-      <img
-        src={poster.image_url}
-        alt={poster.title}
-        onClick={() => handlePosterClick(poster)}
-        onLoad={(e) =>
-          registerHeight(poster.id, e.target.naturalWidth, e.target.naturalHeight)
-        }
-      />
-      {withActions && (
-        <div className="profile-poster-actions">
-          {renderPosterActions(poster)}
-        </div>
-      )}
+      <div className="profile-poster-media">
+        <img
+          src={poster.image_url}
+          alt={poster.title}
+          onClick={() => handlePosterClick(poster)}
+          onLoad={(e) =>
+            registerHeight(poster.id, e.target.naturalWidth, e.target.naturalHeight)
+          }
+        />
+        {withActions && (
+          <div className="profile-poster-actions profile-poster-actions--grid">
+            {renderPosterActions(poster)}
+          </div>
+        )}
+      </div>
     </div>
   );
 
@@ -336,7 +346,7 @@ function UserProfile({ searchQuery, setSearchQuery, availableTags }) {
           ) : viewMode === 'grid' ? (
             <PosterMasonry
               posters={filteredPosters}
-              actionExtraWeight={showActions ? 0.35 : 0}
+              actionExtraWeight={0}
               renderPoster={(poster, registerHeight) =>
                 renderPosterCard(poster, registerHeight, showActions)
               }

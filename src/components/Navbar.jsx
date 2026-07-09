@@ -21,7 +21,7 @@ function Navbar({ user, searchQuery, setSearchQuery }) {
         <div className="top-bar">
         <div className="title-logo"> 
           <Link to="/" className="logo-button-link">
-            <img src="./logo-small.svg" alt="CMU Logo" />
+            <img src="/logo-small.svg" alt="CMU Logo" />
             <h1 className="website-title">
               CMU <br/> Bulletin
             </h1>
@@ -29,7 +29,7 @@ function Navbar({ user, searchQuery, setSearchQuery }) {
         </div>
 
         <div className = "search-bar">
-          <img src="./search-icon.svg" alt="Search" className="search-icon" />
+          <img src="/search-icon.svg" alt="Search" className="search-icon" />
           
           <input
             type="text"

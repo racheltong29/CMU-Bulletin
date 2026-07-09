@@ -2,13 +2,14 @@ import React from "react";
 import FeatureHero from "./FeatureHero";
 import PosterFilters from "./PosterFilters";
 import PosterList from "./PosterList";
+import { FEATURE_HERO_ENABLED } from "../config/featureHero";
 
 function MainPage({ user, activeCategory, filterDate, setFilterDate, filterLocations, setFilterLocations, filterTags, setFilterTags, searchQuery, setSearchQuery, availableTags, viewMode, toggleViewMode  }) {
 
   return (
     <div className="main-page">
       <div className="page-content main-page-content">
-        <FeatureHero activeCategory={activeCategory} />
+        {FEATURE_HERO_ENABLED && <FeatureHero activeCategory={activeCategory} />}
 
         <PosterFilters
           filterDate={filterDate}
